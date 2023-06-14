@@ -22,20 +22,10 @@ ifeq ($(OS),Windows_NT)
   $(info Compiling from $(OS))
 
   PORTLIBS := $(DEVKITPRO)/portlibs/ppc
-  PATH := $(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
-  ifeq ($(DEVKITPRO),$(subst :, ,$(DEVKITPRO)))
-    DEVKITPRO := $(patsubst /$(firstword $(subst /, ,$(DEVKITPRO)))/%,$(firstword $(subst /, ,$(DEVKITPRO))):/%,$(DEVKITPRO))
-    $(info DEVKITPRO corrected to $(DEVKITPRO))
-  else
-    $(info DEVKITPRO is $(DEVKITPRO))
-  endif
+  PATH := $(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(DEVKITPRO)/tools/bin:$(PATH)
+  $(info DEVKITPRO is $(DEVKITPRO))
   PORTLIBS := $(DEVKITPRO)/portlibs/ppc
-  ifeq ($(DEVKITPPC),$(subst :, ,$(DEVKITPPC)))
-    DEVKITPPC := $(patsubst /$(firstword $(subst /, ,$(DEVKITPPC)))/%,$(firstword $(subst /, ,$(DEVKITPPC))):/%,$(DEVKITPPC))
-    $(info DEVKITPPC corrected to $(DEVKITPPC))
-  else
-    $(info DEVKITPPC is $(DEVKITPPC))
-  endif
+  $(info DEVKITPPC is $(DEVKITPPC))
 else
   $(info Compiling from Unix)
 

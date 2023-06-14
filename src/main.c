@@ -26,6 +26,7 @@
 
 #include <fat.h>
 #include <malloc.h>
+#include <unistd.h>
 #include <ogc/consol.h>
 #include <ogc/lwp.h>
 #include <ogc/system.h>
@@ -34,6 +35,7 @@
 #include <sdcard/wiisd_io.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "apploader/apploader.h"
 #include "library/dolphin_os.h"
@@ -52,6 +54,10 @@ int main(void) {
     int ret;
     void *frame_buffer = NULL;
     GXRModeObj *rmode = NULL;
+
+    // fckj you fucking bitch fucekr
+    memset((void *)0x80006000, 0, 0x9FA000);
+    memset((void *)0x80c00000, 0, 0xD00000);
     
     /* The game's boot loader is statically loaded at 0x81200000, so we'd better
      * not start mallocing there! */
@@ -96,48 +102,48 @@ int main(void) {
 
     /* display the welcome message */
     printf("\x1b[2;0H");
-    printf("BrainSlug Wii  v%x.%02x.%04x"
-#ifndef NDEBUG
-        " DEBUG build"
-#endif
-        "\n",
-        BSLUG_VERSION_MAJOR(BSLUG_LOADER_VERSION),
-        BSLUG_VERSION_MINOR(BSLUG_LOADER_VERSION),
-        BSLUG_VERSION_REVISION(BSLUG_LOADER_VERSION));
-    printf(" by Chadderz\n\n");
+    printf("RB3Enhanced Wii Loader - 0.1\n");
+    printf(" based on BrainSlug by Chadderz\n\n");
 
     /* spawn lots of worker threads to do stuff */
     if (!IOSApploader_RunBackground())
         goto exit_error;
         
-    printf("Waiting for game disk...\n");
+    printf("Waiting for game disc...\n");
     Event_Wait(&apploader_event_got_disc_id);
     Event_Wait(&apploader_event_got_ios);
 
-    // Found IOS, reload into that IOS:
-    printf("Game ID: %.4s on IOS%d -> reloading ... ", os0->disc.gamename, _apploader_game_ios);
-    int rval = IOS_ReloadIOS(_apploader_game_ios);
+    if (strncmp(os0->disc.gamename, "SZB", 3) != 0) {
+        printf("This isn't Rock Band 3! Exiting in 10 seconds...\n");
+        goto exit_error;
+    }
 
-    if (rval < 0) {
-        // IOS reload failed, the needed IOS is probably not installed. 
+    // Reload IOS, if we aren't under a cIOS
+    // TODO: check if this detection is any good
+    if (*(short*)0x80003140 < 200) {
+        int rval = IOS_ReloadIOS(_apploader_game_ios);
+        if (rval < 0) {
+            // IOS reload failed, the needed IOS is probably not installed.
+            printf("\nReloading into IOS%d failed (error %d)!\n", _apploader_game_ios, rval);
+            printf("Rock Band 3 will likely run, but USB instruments may not work. (IOS%d)\n\n", current_running_ios);
+            if (!Apploader_RunBackground(1))    // 1 = make the game believe it runs under the correct IOS.
+                goto exit_error;
 
-        printf("\nIt looks like reloading to IOS%d failed (error %d). Maybe it is missing?\n", _apploader_game_ios, rval);
-        printf("Trying to boot the game anyways (under IOS%d), but it might not work correctly.\n", current_running_ios);
+        } else {
+            // IOS reload successful, wait for IOS to load up. 
+            printf("Reloading IOS%d...", _apploader_game_ios);
+            while (*(short*)0x80003140 != _apploader_game_ios);
 
+            if (!Apploader_RunBackground(0))    // 0 = no need to fool, we are running on the correct IOS.
+                goto exit_error;
+        }
+    } else {
+        printf("Custom IOS%d detected.\n\n", current_running_ios);
         if (!Apploader_RunBackground(1))    // 1 = make the game believe it runs under the correct IOS.
             goto exit_error;
-
     }
-    else {
-        // IOS reload successful, wait for IOS to load up. 
-        printf("waiting ... ");
-        while (*(short*)0x80003140 != _apploader_game_ios);
-        printf("done.\n");
 
-        if (!Apploader_RunBackground(0))    // 0 = no need to fool, we are running on the correct IOS.
-            goto exit_error;
-
-    }
+    printf("\r");
 
     // After the IOS reload, run the rest of the background threads. 
     if (!Module_RunBackground())
@@ -155,13 +161,13 @@ int main(void) {
     __io_wiisd.shutdown();
     
     if (!fatMountSimple("sd", &__io_wiisd)) {
-        fprintf(stderr, "Could not mount SD card.\n");
+        fprintf(stderr, "Could not mount SD card. Exiting in 10 seconds...\n");
         goto exit_error;
     }
     
     Event_Trigger(&main_event_fat_loaded);
 
-        
+    bool has_rb3e = false;
     printf("Loading modules...\n");
     Event_Wait(&module_event_list_loaded);
     if (module_list_count == 0) {
@@ -174,6 +180,9 @@ int main(void) {
             module_list_count, module_list_count > 1 ? "s" : "");
         
         for (module = 0; module < module_list_count; module++) {
+            if (strcmp(module_list[module]->name, "RB3Enhanced") == 0)
+                has_rb3e = true;
+            
             printf(
                 "\t%s %s by %s (", module_list[module]->name,
                 module_list[module]->version, module_list[module]->author);
@@ -182,30 +191,37 @@ int main(void) {
         }
         
         Main_PrintSize(module_list_size);
-        puts(" total.");
+        puts(" total.\n");
+    }
+
+    if (!has_rb3e) {
+        printf("\nRB3Enhanced is not properly installed! You can download it from:\nhttps://rb3e.rbenhanced.rocks/download.html\n\nExiting in 5 seconds...\n");
+        goto exit_error;
     }
     
+    printf("Loading, please wait...\n");
     Event_Wait(&apploader_event_complete);
     Event_Wait(&module_event_complete);
     fatUnmount("sd");
     __io_wiisd.shutdown();
+
+    VIDEO_Flush();
+    usleep(1000);
     
     if (module_has_error) {
-        printf("\nPress RESET to exit.\n");
+        printf("\nError loading RB3Enhanced! Try redownloading the mod from:\nhttps://rb3e.rbenhanced.rocks/download.html\n\nExiting in 5 seconds...\n");
         goto exit_error;
     }
     
     if (apploader_game_entry_fn == NULL) {
         fprintf(stderr, "Error... entry point is NULL.\n");
     } else {
-        if (module_has_info || search_has_info) {
-            printf("\nPress RESET to launch game.\n");
-            
-            while (!SYS_ResetButtonDown())
-                VIDEO_WaitVSync();
-            while (SYS_ResetButtonDown())
-                VIDEO_WaitVSync();
-        }
+        // hack to avoid green flash
+        VIDEO_SetBlack(true);
+        VIDEO_Flush();
+        VIDEO_WaitVSync();
+        usleep(2000000);
+        VIDEO_WaitVSync();
         
         SYS_ResetSystem(SYS_SHUTDOWN, 0, 0);
         apploader_game_entry_fn();
@@ -216,19 +232,12 @@ int main(void) {
 exit_error:
     ret = -1;
 exit:
-    while (!SYS_ResetButtonDown())
-        VIDEO_WaitVSync();
-    while (SYS_ResetButtonDown())
-        VIDEO_WaitVSync();
+    sleep(10);
     
     VIDEO_SetBlack(true);
     VIDEO_Flush();
     VIDEO_WaitVSync();
-    
-    free(frame_buffer);
-        
     exit(ret);
-        
     return ret;
 }
 

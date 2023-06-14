@@ -80,7 +80,7 @@ static bslug_loader_entry_t *module_entries = NULL;
 static size_t module_entries_count = 0;
 static size_t module_entries_capacity = 0;
 
-static const char module_path[] = "sd:/bslug/modules";
+static const char module_path[] = "sd:/rb3/rb3e/modules";
 
 static void *Module_Main(void *arg);
 static void *Module_ListAllocate(

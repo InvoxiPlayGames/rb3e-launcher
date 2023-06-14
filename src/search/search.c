@@ -69,7 +69,7 @@ bool search_has_info;
 
 static fsm_t *search_fsm = NULL;
 
-static const char search_path[] = "sd:/bslug/symbols";
+static const char search_path[] = "sd:/rb3/rb3e/symbols";
 
 static void *search_symbol__start;
 
