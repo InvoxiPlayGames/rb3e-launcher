@@ -1,3 +1,4 @@
+#!/bin/bash
 if git --version &>/dev/null; then
     cat > ./src/version.h <<EOF
 // This file will be auto generated during building, and should not be modified manually
