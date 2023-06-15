@@ -31,8 +31,8 @@ PORTLIBS := $(DEVKITPRO)/portlibs/ppc
 PREFIX  ?= $(DEVKITPPC)/bin/powerpc-eabi-
 # Tools to use
 AS      := $(PREFIX)as
-LD      := $(PREFIX)gcc
-CC      := $(PREFIX)gcc
+LD      := $(PREFIX)g++
+CC      := $(PREFIX)g++
 OBJDUMP := $(PREFIX)objdump
 OBJCOPY := $(PREFIX)objcopy
 ELF2DOL ?= elf2dol
@@ -88,11 +88,11 @@ BIN    ?= bin
 # The output directory for releases.
 RELEASE?= release
 # The name of the output file to generate.
-TARGET ?= $(BIN)/boot.dol
+TARGET ?= $(BIN)/launcher.dol
 # The name of the assembler listing file to generate.
-LIST   ?= $(BIN)/boot.list
+LIST   ?= $(BIN)/launcher.list
 # The name of the map file to generate.
-MAP    ?= $(BIN)/boot.map
+MAP    ?= $(BIN)/launcher.map
 
 ###############################################################################
 # Variable init
@@ -115,7 +115,7 @@ LIB_DIRS := $(DEVKITPPC) $(DEVKITPPC)/powerpc-eabi \
 # Rule to make everything.
 PHONY += all
 
-all : $(TARGET) $(BIN)/boot.elf
+all : $(TARGET) $(BIN)/launcher.elf
 
 ###############################################################################
 # Install rule
@@ -187,7 +187,7 @@ $(TARGET) : $(BUILD)/output.elf | $(BIN)
 	-$Qmkdir -p $(dir $@)
 	$Q$(ELF2DOL) $(BUILD)/output.elf $(TARGET) 
 	
-$(BIN)/boot.elf : $(BUILD)/output.elf | $(BIN)
+$(BIN)/launcher.elf : $(BUILD)/output.elf | $(BIN)
 	$(LOG)
 	$Qcp $< $@
 	$Q$(PREFIX)strip $@

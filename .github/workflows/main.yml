@@ -17,5 +17,13 @@ jobs:
 
       - name: Compile
         run: |
-          make install
+          ./scripts/version.sh
           make -j2
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v3
+        with: 
+          name: rb3e-launcher-wii-debug
+          path: |
+            bin/launcher.dol
+            bin/launcher.map
