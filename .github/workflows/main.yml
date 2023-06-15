@@ -15,9 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Git Describe
-        run: git describe --always --match \"tag\" --dirty
-
       - name: Compile
         run: |
           ./scripts/version.sh
