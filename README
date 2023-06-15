@@ -24,11 +24,14 @@ Work-in-progress, some TODO:
 - Pass config INI file to RB3Enhanced, to allow functional legacy SD mode
 - Speed up game launch by allowing hardcoded symbol table
   (possibly built into RB3Enhanced.mod binary?)
+- USB game loading support
+- GitHub Actions builds
 - Possible nicer graphical UI while loading?
 - Possible compatibility with SD-loading cIOSes?
 
 Licensed under the MIT license, see COPYING.
 Includes code from elftoolchain, licensed under 2-clause BSD.
+Includes code from inih, licensed under 3-clause BSD.
 
 Original BrainSlug README follows:
 

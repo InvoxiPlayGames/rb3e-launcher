@@ -43,12 +43,28 @@
 #include "modules/module.h"
 #include "search/search.h"
 #include "threads.h"
+#include "inih.h"
 
 event_t main_event_fat_loaded;
 
 static void Main_PrintSize(size_t size);
 
 short current_running_ios = 0; 
+
+// magic to tell the mod a config is provided (after 0.6)
+#define LAUNCHER_CONFIG_MAGIC 0x53443A44
+
+// function to phase thru the INI file
+#define RB3E_CONFIG_BOOL(x) ((strcmp(x, "true") == 0 || strcmp(x, "TRUE") == 0 || strcmp(x, "True") == 0 || strcmp(x, "1") == 0) ? 1 : 0)
+static int inihandler(void *user, const char *section, const char *name, const char *value) {
+    if (value == NULL) return 0;
+    // set the user provided value to the value of LegacySDModeLauncher
+    bool *legacy_sd_mode = (bool *)user;
+    if (strcmp(section, "Wii") == 0 && strcmp(name, "LegacySDModeLauncher") == 0)
+        *legacy_sd_mode = RB3E_CONFIG_BOOL(value);
+    // just return 1 regardless
+    return 1;
+}
 
 int main(void) {
     int ret;
@@ -199,9 +215,35 @@ int main(void) {
         goto exit_error;
     }
     
+
     printf("Loading, please wait...\n");
     Event_Wait(&apploader_event_complete);
     Event_Wait(&module_event_complete);
+    
+    // see if rb3e exports the ability to use the config 
+    int *hasconfig_sym = Search_SymbolLookup("RB3E_Launcher_HasConfig");
+    char *config_sym = Search_SymbolLookup("RB3E_Launcher_Config");
+    // buffer to store the loaded config
+    char config_buf[0x1000];
+    // check the SD card for a config file
+    if (hasconfig_sym != NULL && config_sym != NULL) {
+        FILE *cf = fopen("sd:/rb3/rb3.ini", "r");
+        if (cf != NULL) {
+            printf("Loading config from SD card...\n");
+            int r = fread(config_buf, 1, sizeof(config_buf), cf);
+            if (r > 0) {
+                // only pass config to the game if rb3/LegacySDModeLauncher is enabled in rb3.ini
+                bool legacy_sd_mode = false;
+                if (ini_parse_string(config_buf, inihandler, &legacy_sd_mode) >= 0 && legacy_sd_mode) {
+                    // copy from the buffer into the mod
+                    strncpy(config_sym, config_buf, 0x1000);
+                    *hasconfig_sym = LAUNCHER_CONFIG_MAGIC;
+                }
+            }
+            fclose(cf);
+        }
+    }
+
     fatUnmount("sd");
     __io_wiisd.shutdown();
 
