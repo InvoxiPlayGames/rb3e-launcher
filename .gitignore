@@ -4,3 +4,7 @@ release
 *.o
 *.d
 *.out
+*.elf
+*.dol
+*.mod
+version.h

@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-20.04
-    timeout-minutes: 10
+    timeout-minutes: 2
 
     container:
       image: docker://devkitpro/devkitppc
@@ -18,6 +18,4 @@ jobs:
       - name: Compile
         run: |
           make install
-          make
-
-            
+          make -j2

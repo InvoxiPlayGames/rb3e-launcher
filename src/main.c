@@ -43,6 +43,7 @@
 #include "modules/module.h"
 #include "search/search.h"
 #include "threads.h"
+#include "version.h"
 #include "inih.h"
 
 event_t main_event_fat_loaded;
@@ -118,7 +119,8 @@ int main(void) {
 
     /* display the welcome message */
     printf("\x1b[2;0H");
-    printf("RB3Enhanced Wii Loader - 0.1\n");
+    printf("RB3Enhanced Wii Loader - " BUILD_TAG "\n");
+    printf(" https://rb3e.rbenhanced.rocks/\n");
     printf(" based on BrainSlug by Chadderz\n\n");
 
     /* spawn lots of worker threads to do stuff */

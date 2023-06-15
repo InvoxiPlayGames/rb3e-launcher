@@ -41,8 +41,8 @@ endif
 PREFIX  ?= powerpc-eabi-
 # Tools to use
 AS      := $(PREFIX)as
-LD      := $(PREFIX)g++
-CC      := $(PREFIX)g++
+LD      := $(PREFIX)gcc
+CC      := $(PREFIX)gcc
 OBJDUMP := $(PREFIX)objdump
 OBJCOPY := $(PREFIX)objcopy
 ELF2DOL ?= elf2dol
@@ -215,6 +215,14 @@ $(BUILD) :
 # Rule to make output directory
 $(BIN) : 
 	$Qmkdir $@
+
+# Rule to make Git version header file
+.PHONY: version.h
+version.h:
+	$Qscripts/version.sh
+
+# Require version header before building objects
+$(OBJECTS) : version.h
 
 ###############################################################################
 # Standard build rules
