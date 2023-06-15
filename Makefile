@@ -18,27 +18,17 @@ ifeq ($(strip $(DEVKITPRO)),)
   $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
 
-ifeq ($(OS),Windows_NT)
-  $(info Compiling from $(OS))
-
-  PORTLIBS := $(DEVKITPRO)/portlibs/ppc
-  PATH := $(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(DEVKITPRO)/tools/bin:$(PATH)
-  $(info DEVKITPRO is $(DEVKITPRO))
-  PORTLIBS := $(DEVKITPRO)/portlibs/ppc
-  $(info DEVKITPPC is $(DEVKITPPC))
-else
-  $(info Compiling from Unix)
-
-  PORTLIBS := $(DEVKITPRO)/portlibs/ppc
-  $(info DEVKITPRO is $(DEVKITPRO))
-  $(info DEVKITPPC is $(DEVKITPPC))
-endif
+$(info DEVKITPRO is $(DEVKITPRO))
+$(info DEVKITPPC is $(DEVKITPPC))
+PORTLIBS := $(DEVKITPRO)/portlibs/ppc
+PATH := $(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(DEVKITPRO)/tools/bin:$(PATH)
+PORTLIBS := $(DEVKITPRO)/portlibs/ppc
 
 ###############################################################################
 # Compiler settings
 
 # The toolchain to use.
-PREFIX  ?= powerpc-eabi-
+PREFIX  ?= $(DEVKITPPC)/bin/powerpc-eabi-
 # Tools to use
 AS      := $(PREFIX)as
 LD      := $(PREFIX)gcc
