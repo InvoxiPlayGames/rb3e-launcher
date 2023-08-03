@@ -61,7 +61,7 @@ static int inihandler(void *user, const char *section, const char *name, const c
     if (value == NULL) return 0;
     // set the user provided value to the value of LegacySDModeLauncher
     bool *legacy_sd_mode = (bool *)user;
-    if (strcmp(section, "Wii") == 0 && strcmp(name, "LegacySDModeLauncher") == 0)
+    if (strcmp(section, "Wii") == 0 && strcmp(name, "LegacySDMode") == 0)
         *legacy_sd_mode = RB3E_CONFIG_BOOL(value);
     // just return 1 regardless
     return 1;
