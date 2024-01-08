@@ -1,13 +1,15 @@
 rb3e-launcher, RB3Enhanced launcher for Wii
 https://github.com/InvoxiPlayGames/rb3e-launcher
 
+The forwarder will launch from sd:/rb3/rb3e/launcher.dol
+
 a fork of BrainSlug Wii by Chadderz
 https://github.com/Chadderz121/brainslug-wii
 
 for use with RB3Enhanced, by RBEnhanced (ihatecompvir, InvoxiPlayGames, and more)
 https://rb3e.rbenhanced.rocks/
 https://github.com/RBEnhanced/RB3Enhanced
-if you want to install RB3Enhanced, or have questions - see above pages, not here
+if you want to install RB3Enhanced, or have questions - see above pages, not here.
 
 This is a Wii game loader designed to load Rock Band 3, RB3Enhanced, and helper
 libraries, and link them all together.
@@ -18,14 +20,13 @@ Changes from base BrainSlug repo:
 - Cleans up RAM upon launch (fixes crashes)
 - Automatic exit upon failure
 - Removes green flash before game launch
-
-Work-in-progress, some TODO:
-- Streamline source tree, remove BrainSlug channel specific cruft
 - Pass config INI file to RB3Enhanced, to allow functional legacy SD mode
+
+TODO:
+- Streamline source tree, remove BrainSlug channel specific cruft
 - Speed up game launch by allowing hardcoded symbol table
   (possibly built into RB3Enhanced.mod binary?)
-- USB game loading support
-- GitHub Actions builds
+- USB game loading support built-in
 - Possible nicer graphical UI while loading?
 - Possible compatibility with SD-loading cIOSes?
 
